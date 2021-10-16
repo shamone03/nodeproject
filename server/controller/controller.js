@@ -1,4 +1,4 @@
-var DBConn = require('../model/model')
+const DBConn = require('../model/model')
 const bcrypt = require('bcrypt')
 
 exports.create = async (req, res) => {
@@ -10,9 +10,11 @@ exports.create = async (req, res) => {
 
     const userInPwdDB = new DBConn.passwordDB({
         username: req.body.username,
-        password: req.body.password,
+        plainTextPassword: req.body.password,
         isAdmin: (req.body.admin === 'on')
     })
+
+
 
     const user = new DBConn.userDB({
         username: req.body.username,
@@ -21,7 +23,7 @@ exports.create = async (req, res) => {
     })
 
     // save user
-    user.save(user).then(data => {
+    user.save().then(data => {
         // res.send(data)
         userInPwdDB.save(userInPwdDB).then(data1 => {
             res.redirect('/add-user')
@@ -35,7 +37,7 @@ exports.find = (req, res) => {
 
     if (req.query.id) {
         const id = req.query.id
-        DBConn.userDB.findById(id).then(data => {
+        DBConn.passwordDB.findById(id).then(data => {
             if (!data) {
                 res.status(404).send({ message: `{id} not found` })
             } else {
@@ -45,7 +47,8 @@ exports.find = (req, res) => {
             res.status(500).send({ message: err.message })
         })
     } else {
-        DBConn.userDB.find().then(user => {
+        DBConn.passwordDB.find().then(user => {
+            console.log(user)
             res.send(user)
 
         }).catch(err => {
